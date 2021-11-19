@@ -1,9 +1,8 @@
-MILE_TO_KM = 1.609344
-GALLON_TO_LITER = 4.54609188
+KM_IN_MILE = 1.609_344
+LITER_IN_GALLON = 4.546_091_88
 
 def converter(mpg)
-  kpl = ((mpg * MILE_TO_KM)/GALLON_TO_LITER).round(2)
-  puts kpl
+  (mpg * KM_IN_MILE / LITER_IN_GALLON).round(2)
 end
 
-converter(36)
+puts converter(36)
