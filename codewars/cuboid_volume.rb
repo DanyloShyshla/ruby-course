@@ -1,6 +1,5 @@
 def calculate_cuboid_volume(length, width, height)
-  volume = length * width * height
-  puts "Cuboid volume: #{volume}"
+  width * height * length
 end
 
-calculate_cuboid_volume(5,5,5)
+puts calculate_cuboid_volume(5, 5, 5)
