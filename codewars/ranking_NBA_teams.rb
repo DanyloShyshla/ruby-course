@@ -1,4 +1,4 @@
-r = "Los Angeles Clippers 104 Dallas Mavericks 88,New York Knicks 101 Atlanta Hawks 112,Indiana Pacers 103 Memphis Grizzlies 112,"\
+RESULT_SHEET = "Los Angeles Clippers 104 Dallas Mavericks 88,New York Knicks 101 Atlanta Hawks 112,Indiana Pacers 103 Memphis Grizzlies 112,"\
      "Los Angeles Lakers 111 Minnesota Timberwolves 112,Phoenix Suns 95 Dallas Mavericks 111,Portland Trail Blazers 112 New Orleans Pelicans 94,"\
      "Sacramento Kings 104 Los Angeles Clippers 111,Houston Rockets 85 Denver Nuggets 105,Memphis Grizzlies 76 Cleveland Cavaliers 106,"\
      "Milwaukee Bucks 97 New York Knicks 122,Oklahoma City Thunder 112 San Antonio Spurs 106,Boston Celtics 112 Philadelphia 76ers 95,"\
@@ -14,9 +14,9 @@ r = "Los Angeles Clippers 104 Dallas Mavericks 88,New York Knicks 101 Atlanta Ha
      "Los Angeles Clippers 130 Golden State Warriors 95,Utah Jazz 102 Oklahoma City Thunder 113,San Antonio Spurs 84 Phoenix Suns 104,"\
      "Chicago Bulls 103 Indiana Pacers 94,Milwaukee Bucks 106 Minnesota Timberwolves 88,Los Angeles Lakers 104 Portland Trail Blazers 102,"\
      "Houston Rockets 120 New Orleans Pelicans 100,Boston Celtics 111 Brooklyn Nets 105,Charlotte Hornets 94 Chicago Bulls 86,"\
-     "Cleveland Cavaliers 103 Dallas Mavericks 97"
+     "Cleveland Cavaliers 103 Dallas Mavericks 97".freeze
 
-teams = "Los Angeles Clippers,Dallas Mavericks,New York Knicks,NYK,Atlanta Hawks,Indiana Pacers,Memphis Grizzlies,"\
+TEAMS = "Los Angeles Clippers,Dallas Mavericks,New York Knicks,NYK,Atlanta Hawks,Indiana Pacers,Memphis Grizzlies,"\
          "Los Angeles Lakers,Minnesota Timberwolves,Phoenix Suns,Portland Trail Blazers,New Orleans Pelicans,"\
          "Sacramento Kings,Los Angeles Clippers,Houston Rockets,Denver Nuggets,Cleveland Cavaliers,Milwaukee Bucks,"\
          "Oklahoma City Thunder, San Antonio Spurs,Boston Celtics,Philadelphia 76ers,Brooklyn Nets,Chicago Bulls,"\
@@ -24,37 +24,29 @@ teams = "Los Angeles Clippers,Dallas Mavericks,New York Knicks,NYK,Atlanta Hawks
          "Golden State Warriors,Dallas Maver"
 
 def nba_cup(result_sheet, to_find)
-
   results = { wins: 0, draws: 0, losses: 0, scored: 0, conceded: 0, points: 0 }
 
-  # Parsing the game string to evaluate what num is scored and conceded for searched team:
-  #   1) Taking from game an array of digits in order they stands in game string using scan().
-  #   2) Checking if any team contain numbers in name and deleting them from array.
-  #   3) Depending on position of the team in the string define which of the numbers is scored and conceded.
   parser = lambda do |to_find, game|
     game_score = game.scan(/\d+\w/)
 
     if game_score.size > 2
-      puts "One of team names contains numbers"
+      puts 'One of team names contains numbers'
       game_score.each do |res|
-        if res[/[a-z]/]
-          game_score.delete(res)
-        end
+        game_score.delete(res) if res[/[a-z]/]
       end
     end
 
-    if game.start_with?(to_find) == false
-      conceded_in_game = game_score[0].to_i
-      scored_in_game = game_score[1].to_i
-    else
+    if game.start_with?(to_find)
       scored_in_game = game_score[0].to_i
       conceded_in_game = game_score[1].to_i
+    else
+      conceded_in_game = game_score[0].to_i
+      scored_in_game = game_score[1].to_i
     end
 
     return scored_in_game, conceded_in_game
   end
 
-  # Calculating if it's win,draw or loss and how many points searched team earned in one game.
   calc_game_results = lambda do |scored, conceded, wins, losses, draws, points|
     if scored > conceded
       wins += 1
@@ -68,56 +60,35 @@ def nba_cup(result_sheet, to_find)
     return wins, losses, draws, points
   end
 
-  # If game include name of the searched team call the parser() and calc_game_results() and updating results hash.
   process_game = lambda do |game|
     if game.include?(to_find)
 
       scored, conceded = parser.call(to_find, game)
 
-      s = results[:scored] + scored
-      c = results[:conceded] + conceded
-      results.update(scored: s, conceded: c)
+      total_scored = results[:scored] + scored
+      total_conceded = results[:conceded] + conceded
+      results.update(scored: total_scored, conceded: total_conceded)
 
       wins, losses, draws, points = calc_game_results.call(scored, conceded, results[:wins], results[:losses], results[:draws], results[:points])
       results.update(wins: wins, losses: losses, draws: draws, points: points)
     end
   end
 
-  # Return ERROR if string contain float number.
   check_if_float = lambda do |game|
-    if game[/[0-9]\.[0-9]/]
-      puts "Error(float number): #{game}"
-    end
+    puts "Error(float number): #{game}" if game[/[0-9]\.[0-9]/]
   end
 
-  # Main program logic
-  #   1) Define how many games are in the input string.
-  #   2) Loping through the input string games times.
-  #   3) Define one game and calling lambdas for results processing.
-  #   4) Delete processed game from the string.
   if result_sheet.include?(to_find)
-    num_games = result_sheet.scan(",").count + 1
-    iterator = 0
-    loop do
-      if result_sheet.include?(",")
-        game = result_sheet[0, result_sheet.index(",")]
-        check_if_float.call(game)
-        process_game.call(game)
-        result_sheet.slice!(0, result_sheet.index(",") + 1)
-      else
-        game = result_sheet
-        check_if_float.call(game)
-        process_game.call(game)
-      end
-      iterator += 1
-      if iterator == num_games
-        break
-      end
+    games = result_sheet.split(',')
+    games.each do |game|
+      check_if_float.call(game)
+      process_game.call(game)
     end
-    puts "#{to_find}:W=#{results[:wins]};D=#{results[:draws]};L=#{results[:losses]};Scored=#{results[:scored]};Conceded=#{results[:conceded]};Points=#{results[:points]}"
+    "#{to_find}:W=#{results[:wins]};D=#{results[:draws]};L=#{results[:losses]};Scored=#{results[:scored]};Conceded=#{results[:conceded]};Points=#{results[:points]}"
   else
     "#{to_find}:This team didn't play!"
   end
+
 end
 
-nba_cup(r, "Charlotte Hornets")
+nba_cup(RESULT_SHEET, 'Los Angeles Clippers')
