@@ -1,4 +1,4 @@
-RESULT_SHEET = "Los Angeles Clippers 104 Dallas Mavericks 88,New York Knicks 101 Atlanta Hawks 112,Indiana Pacers 103 Memphis Grizzlies 112,"\
+RESULT_SHEET = "Los Angeles Clippers 104 Dallas Mavericks 88,New York Knicks 101.123 Atlanta Hawks 112,Indiana Pacers 103 Memphis Grizzlies 112,"\
      "Los Angeles Lakers 111 Minnesota Timberwolves 112,Phoenix Suns 95 Dallas Mavericks 111,Portland Trail Blazers 112 New Orleans Pelicans 94,"\
      "Sacramento Kings 104 Los Angeles Clippers 111,Houston Rockets 85 Denver Nuggets 105,Memphis Grizzlies 76 Cleveland Cavaliers 106,"\
      "Milwaukee Bucks 97 New York Knicks 122,Oklahoma City Thunder 112 San Antonio Spurs 106,Boston Celtics 112 Philadelphia 76ers 95,"\
@@ -75,14 +75,15 @@ def nba_cup(result_sheet, to_find)
   end
 
   check_if_float = lambda do |game|
-    puts "Error(float number): #{game}" if game[/[0-9]\.[0-9]/]
+    game[/[0-9]\.[0-9]/] ? "Error(float number): #{game}" : process_game.call(game)
   end
 
-  if result_sheet.include?(to_find)
+  if to_find == ''
+    ''
+  elsif result_sheet.include?(to_find + ' ')
     games = result_sheet.split(',')
     games.each do |game|
       check_if_float.call(game)
-      process_game.call(game)
     end
     "#{to_find}:W=#{results[:wins]};D=#{results[:draws]};L=#{results[:losses]};Scored=#{results[:scored]};Conceded=#{results[:conceded]};Points=#{results[:points]}"
   else
@@ -91,4 +92,4 @@ def nba_cup(result_sheet, to_find)
 
 end
 
-nba_cup(RESULT_SHEET, 'Los Angeles Clippers')
+puts nba_cup(RESULT_SHEET, 'Atlanta Hawks')
